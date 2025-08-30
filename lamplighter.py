@@ -58,7 +58,8 @@ async def play_music(vc: discord.VoiceClient, guild_id: int):
         index = current_track.get(guild_id, 0)
         filepath = os.path.join(MUSIC_FOLDER, files[index])
 
-        vc.play(discord.FFmpegPCMAudio(filepath))
+        # Play with 68% volume
+        vc.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(filepath), volume=0.68))
         print(f"▶️ Playing: {get_track_title(filepath)}")
         while vc.is_playing():
             await asyncio.sleep(1)
@@ -96,7 +97,10 @@ async def play(interaction: discord.Interaction, track: str):
     current_track[guild.id] = index
     if vc.is_playing():
         vc.stop()
-    vc.play(discord.FFmpegPCMAudio(os.path.join(MUSIC_FOLDER, files[index])))
+    vc.play(discord.PCMVolumeTransformer(
+        discord.FFmpegPCMAudio(os.path.join(MUSIC_FOLDER, files[index])),
+        volume=0.68
+    ))
     await interaction.response.send_message(f"▶️ Now playing: {track}")
 
 # Autocomplete for track selection
@@ -147,3 +151,4 @@ async def on_stage_instance_delete(stage_instance: discord.StageInstance):
         bot.loop.create_task(unmute_self(vc))
 
 bot.run(TOKEN)
+s
